@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Analyzer Website</title>
+</head>
+<body>
+    <h1>Meal analyzer</h1>
+    <!-- collects the user input -->
+    <!-- When user submits the form, send data to the /analyze route in your backend. -->
+    <form action="/analyze" method="POST"> 
+        <!-- This is the variable ('meal') name sent to backend. -->
+        <input type="text" name="meal" placeholder="So what are having?">
+
+        <!-- basically submit clicking send the form to flask backend route /analyze -->
+        <button type="submit">Analyze</button>
+    </form>
+    <!-- <p>Type something</p> -->
+</body>
+</html>
