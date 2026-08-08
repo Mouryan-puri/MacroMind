@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 import os
 import json
 from database import init_db, save_meal
-from datetime import datetime, date
+from datetime import date
 
 load_dotenv() 
 api_key = os.getenv("GEMINI_API_KEY")
@@ -92,7 +92,7 @@ def log_meal():
         contents=prompt,
     )
 
-    today=datetime.today()# will store today's date
+    today=date.today().isoformat# will store today's date
 
     data=response.text
     data=json.loads(data) # this loads the response and convert this into json formatting

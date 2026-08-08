@@ -36,13 +36,37 @@ def init_db():
     # once done, we have to close the connection to avoid any errors or data mismanagement
     connection.close()
 
-def save_meal(meal, meal_type, response, today):
+def save_meal(meal_description, meal_type, data, meal_date):
     connection=sqlite3.connect("meals.db")
     curr=connection.cursor()
 
     # basically, insert a row into table named meals, where columns where data will go are meal, response.
     # (?,?) are placeholders. They act as temporary slots for your actual data, telling the database to expect two inputs.
     # last (meal, response) are actual python tuple containing data that will go in table
-    curr.execute("INSERT INTO meals (meal_type, meal_name, meal_description, calories, protein, carbs, fat, date) VALUES (?,?,?,?,?,?,?,?)", (meal_type, meal, response['meal_name'], response['calories'], response['protein'], response['carbs'], response['fat'],today))
+    curr.execute(
+        """
+        INSERT INTO meals (
+            meal_type,
+            meal_name,
+            meal_description,
+            calories,
+            protein,
+            carbs,
+            fat,
+            date
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            meal_type,
+            data["meal_name"],
+            meal_description,
+            data["calories"],
+            data["protein"],
+            data["carbs"],
+            data["fat"],
+            meal_date
+        )
+        )
     connection.commit() # to commit the actual changes 
     connection.close() # to close the connection bw sqlite and python
