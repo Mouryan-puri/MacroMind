@@ -27,6 +27,7 @@ from dotenv import load_dotenv
 import os
 import json
 from database import init_db, save_meal
+from datetime import datetime, date
 
 load_dotenv() 
 api_key = os.getenv("GEMINI_API_KEY")
@@ -46,28 +47,42 @@ def home():
 
 # there is also a route called /analyze
 # but it is meant to receive submitted form data
-@app.route("/analyze", methods=["POST"])
-def analyze():
+@app.route("/meals", methods=["POST"])
+def log_meal():
     # meal = request.form["meal"]  # grabs the value typed in the box, using the 'name' from HTML
     # return f"<h1>You typed: {meal}</h1><p>Score: 75 (fake for now)</p>"
 
     meal=request.form.get("meal")
+    meal_type=request.form.get("meal_type")
 
     # Gemini client that uses the API key to perform any task
     client=genai.Client(api_key=api_key)
 
-    prompt= f"""
-    You are a meal analyzer.
-    The user ate: {meal}
+    prompt = f"""
+    You are a meal-tracking assistant.
 
-    Analyze this meal and return ONLY a JSON object with exactly this structure, nothing else:
+    The user logged this meal:
+    {meal}
+
+    Estimate the nutrition for this meal.
+
+    Return only one valid JSON object.
+    Do not include Markdown, code fences, explanations, or extra text.
+
+    Use exactly this structure:
+
     {{
-        "ingredients": ["ingredient1", "ingredient2"],
-        "macros":["protien: 20 gm", "carbs: 10 gm", others too]
-        "health_score": 72,
-        "verdict": "one line summary of the meal",
-        "suggestion": "one specific suggestion to make it healthier"
+        "meal_name": "short, clear meal name",
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
     }}
+
+    Rules:
+    - calories must be a whole number in kcal.
+    - protein, carbs, and fat must be whole numbers in grams.
+    - Make reasonable estimates when portion sizes are not provided.
     """
 
     # function that sends your prompt to AI model and gets answer back
@@ -77,11 +92,14 @@ def analyze():
         contents=prompt,
     )
 
-    save_meal(meal, response.text)
+    today=datetime.today()# will store today's date
 
     data=response.text
-    data=json.loads(data)
+    data=json.loads(data) # this loads the response and convert this into json formatting
+
     print(data)
+    save_meal(meal, meal_type, data, today)
+
     return render_template("result.html", meal=meal, data=data)
 
 

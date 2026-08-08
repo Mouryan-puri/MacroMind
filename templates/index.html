@@ -3,19 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meal Analyzer Website</title>
+    <title>MealTrack</title>
 </head>
 <body>
-    <h1>Meal analyzer</h1>
-    <!-- collects the user input -->
-    <!-- When user submits the form, send data to the /analyze route in your backend. -->
-    <form action="/analyze" method="POST"> 
-        <!-- This is the variable ('meal') name sent to backend. -->
-        <input type="text" name="meal" placeholder="So what are having?">
+    <h1>Log a Meal</h1>
 
-        <!-- basically submit clicking send the form to flask backend route /analyze -->
-        <button type="submit">Analyze</button>
+    <form action="/meals" method="POST">
+        <label for="meal_type">Which meal are you logging?</label>
+
+        <select id="meal_type" name="meal_type" required>
+            <option value="" selected disabled>Select a meal type</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Snack">Snack</option>
+            <option value="Dinner">Dinner</option>
+        </select>
+
+        <br><br>
+
+        <label for="meal">What did you eat?</label>
+
+        <input
+            id="meal"
+            name="meal"
+            type="text"
+            placeholder="Example: eggs, toast, and coffee"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">Add Meal</button>
     </form>
-    <!-- <p>Type something</p> -->
 </body>
 </html>

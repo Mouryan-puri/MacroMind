@@ -8,28 +8,11 @@
 <body>
     <!-- jinja2 formatting -->
     <h1>you typed {{meal}}</h1>
-    <p>score is {{data.health_score}}</p>
-
-    <h1>So the Ingredients are: </h1>
-    <ul>
-        {% for i in data.ingredients %}
-        <li>{{i}}</li>
-        {%endfor%}
-    </ul>
-
-    <h1>Macros</h1>
-    <ul>
-        {% for i in data.macros %}
-        <li>{{i}}</li>
-        {%endfor%}
-    </ul>
-
-    <h1>Overall</h1>
-    <p>{{data.verdict}}</p>
-
-    <h1>Suggestion</h1>
-    <p>{{data.suggestion}}</p>
-
+    <p>Protein: {{data.protein}}</p>
+    <p>Carbs: {{data.carbs}}</p>
+    <p>Fats: {{data.fat}}</p>
+    <p>Calories: {{data.calories}}</p>
+    
     <a href="/">Try again for another meal</a>
 </body>
 </html>
