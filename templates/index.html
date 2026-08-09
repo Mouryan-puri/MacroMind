@@ -35,5 +35,24 @@
 
         <button type="submit">Add Meal</button>
     </form>
+
+    <h2>Today's Meals</h2>
+
+    {% if meals %}
+        <ul>
+            {% for meal in meals %}
+                <li>
+                    <strong>{{ meal["meal_type"] }}</strong> —
+                    {{ meal["meal_name"] }}
+                    ({{ meal["calories"] }} kcal)
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No meals logged today.</p>
+    {% endif %}    
+
+    <button>Delete</button>
+    
 </body>
 </html>

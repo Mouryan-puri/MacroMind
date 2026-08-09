@@ -5,6 +5,9 @@
 import sqlite3
 from datetime import datetime, date
 
+# meal_name: gemini cleaner name
+# meal_description: original user entered value
+# meal_type: is it breakfast, lunch, snack or dinner
 def init_db():
     # first of all, make a connection to a database file if present, otherwise sqlite creates one  
     connection=sqlite3.connect("meals.db")
@@ -70,3 +73,27 @@ def save_meal(meal_description, meal_type, data, meal_date):
         )
     connection.commit() # to commit the actual changes 
     connection.close() # to close the connection bw sqlite and python
+
+def get_meals_for_date(meal_date):
+    connection=sqlite3.connect('meals.db')
+    connection.row_factory = sqlite3.Row
+    curr=connection.cursor()
+
+    # we have to write sql query such that it takes all the necessary columns and shows it back at the homepage 
+    curr.execute(
+        """
+        SELECT meal_type, meal_name, meal_description,
+               calories, protein, carbs, fat, date
+        
+        FROM meals
+        WHERE date=?
+        ORDER BY created_at DESC
+        """ ,
+        (meal_date, )
+    )
+    meals=curr.fetchall()
+
+    connection.commit()
+    connection.close()
+
+    return meals

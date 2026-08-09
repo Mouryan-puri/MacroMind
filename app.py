@@ -21,12 +21,12 @@
     # renders result.html with the returned output
     # starts the server using app.run(debug=True)
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from google import genai
 from dotenv import load_dotenv
 import os
 import json
-from database import init_db, save_meal
+from database import init_db, save_meal, get_meals_for_date
 from datetime import date
 
 load_dotenv() 
@@ -43,7 +43,10 @@ def home():
     # return "<h1> Meal analyzer </h1> <p> Type your value below </p>"
 
     # render_template("index.html") — Flask automatically looks inside a folder called templates for your HTML files. This is a strict rule — the folder MUST be named templates, Flask looks for it by default.
-    return render_template("index.html")
+    today=date.today().isoformat()
+    meals=get_meals_for_date(today)
+
+    return render_template("index.html", meals=meals)
 
 # there is also a route called /analyze
 # but it is meant to receive submitted form data
@@ -88,11 +91,11 @@ def log_meal():
     # function that sends your prompt to AI model and gets answer back
     # basically, this take this input text, send it to gemini, let gemini think, and gets the response back
     response = client.models.generate_content(
-        model="gemini-3.6-flash",
+        model="gemini-3.5-flash",
         contents=prompt,
     )
 
-    today=date.today().isoformat# will store today's date
+    today=date.today().isoformat()# will store today's date
 
     data=response.text
     data=json.loads(data) # this loads the response and convert this into json formatting
@@ -100,7 +103,12 @@ def log_meal():
     print(data)
     save_meal(meal, meal_type, data, today)
 
-    return render_template("result.html", meal=meal, data=data)
+    # return render_template("result.html", meal=meal, data=data)
+
+    #basically 
+    # url_for("home")-> finds the correct url connected to the function home
+    # redirect() simply redirects to that corresponding url 
+    return redirect(url_for("home"))
 
 
 

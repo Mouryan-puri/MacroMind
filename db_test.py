@@ -9,7 +9,7 @@ conn = sqlite3.connect("meals.db")
 df = pd.read_sql_query("SELECT * FROM meals", conn)
 
 # 3. View the first few rows of the data
-print(df['meal'])
+print(df['meal_description'])
 
 # 4. Close the connection
 conn.close()
