@@ -82,7 +82,7 @@ def get_meals_for_date(meal_date):
     # we have to write sql query such that it takes all the necessary columns and shows it back at the homepage 
     curr.execute(
         """
-        SELECT meal_type, meal_name, meal_description,
+        SELECT id, meal_type, meal_name, meal_description,
                calories, protein, carbs, fat, date
         
         FROM meals
@@ -93,7 +93,20 @@ def get_meals_for_date(meal_date):
     )
     meals=curr.fetchall()
 
+    for meal in meals:
+        print(meal["meal_type"])
     connection.commit()
     connection.close()
 
     return meals
+
+def delete_meal(meal_id):
+    connection=sqlite3.connect("meals.db")
+    curr=connection.cursor()
+    curr.execute(
+        "DELETE FROM meals WHERE id=?",
+        (meal_id,)
+    )
+
+    connection.commit()
+    connection.close()
