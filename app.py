@@ -26,7 +26,7 @@ from google import genai
 from dotenv import load_dotenv
 import os
 import json
-from database import init_db, save_meal, get_meals_for_date
+from database import init_db, save_meal, get_meals_for_date, delete_meal
 from datetime import date
 
 load_dotenv() 
@@ -46,7 +46,33 @@ def home():
     today=date.today().isoformat()
     meals=get_meals_for_date(today)
 
-    return render_template("index.html", meals=meals)
+    # now we have to categorize the meal_type so it is displayed seperately on the homepage
+    meal_by_type={
+        "Breakfast":[],
+        "Lunch":[],
+        "Snack":[],
+        "Dinner":[]
+    }
+
+    for meal in meals:
+        (meal_by_type[meal["meal_type"]]).append(meal)
+
+    # At this point, I have stored all todays meals in our database, so I also have to display the current macros on the dashboard like total calories, protein, carbs, fats
+
+    total_macros={
+        "calories":0,
+        "protein":0,
+        "fat":0,
+        "carbs":0
+    }
+
+    for meal in meals:
+        total_macros["calories"]+=meal["calories"]
+        total_macros["protein"]+=meal["protein"]
+        total_macros["fat"]+=meal["fat"]
+        total_macros["carbs"]+=meal["carbs"]
+
+    return render_template("index.html", meals_by_type=meal_by_type, total_macros=total_macros)
 
 # there is also a route called /analyze
 # but it is meant to receive submitted form data
@@ -106,10 +132,18 @@ def log_meal():
     # return render_template("result.html", meal=meal, data=data)
 
     #basically 
-    # url_for("home")-> finds the correct url connected to the function home
+    # url_for("home")-> finds the correct  url connected to the function home
     # redirect() simply redirects to that corresponding url 
     return redirect(url_for("home"))
 
+
+@app.route("/meals/<int:meal_id>/delete",methods=["POST"])
+def delete_logged_meal(meal_id):
+    delete_meal(meal_id)
+
+    return redirect(url_for("home"))
+    
+    
 
 
 # What it does: It checks if a Python file is being run directly as the main program or if it is being imported as a helper module by another file.How it works: Python automatically changes a hidden variable called __name__. If you run the file directly, Python sets it to "__main__". If you import the file, Python changes it to the file's actual name.Why it is needed: It acts as a safety guard. Without it, any loose code or print statements in a file will accidentally run the exact moment you try to import and reuse that file in a new project.
