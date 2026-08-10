@@ -36,21 +36,41 @@
         <button type="submit">Add Meal</button>
     </form>
 
+    <h2>Today's Nutrition</h2>
+    <ul>
+        <li>Calories: {{ total_macros["calories"] }} kcal</li>
+        <li>Protein: {{ total_macros["protein"] }} g</li>
+        <li>Carbs: {{ total_macros["carbs"] }} g</li>
+        <li>Fat: {{ total_macros["fat"] }} g</li>
+    </ul>
+
     <h2>Today's Meals</h2>
 
-    {% if meals %}
-        <ul>
-            {% for meal in meals %}
-                <li>
-                    <strong>{{ meal["meal_type"] }}</strong> —
-                    {{ meal["meal_name"] }}
-                    ({{ meal["calories"] }} kcal)
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No meals logged today.</p>
-    {% endif %}    
+    {% for meal_type, section_meals in meals_by_type.items() %}
+        <section>
+            <h3>{{ meal_type }}</h3>
+
+            {% if section_meals %}
+                <ul>
+                    {% for meal in section_meals %}
+                        <li>
+                            {{ meal["meal_name"] }}
+                            — {{ meal["calories"] }} kcal
+                            <form
+                                action="{{ url_for('delete_logged_meal', meal_id=meal['id']) }}"
+                                method="POST"
+                                style="display: inline;"
+                            >
+                                <button type="submit">Delete</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No {{ meal_type.lower() }} logged yet.</p>
+            {% endif %}
+        </section>
+    {% endfor %}
 
     <button>Delete</button>
     
