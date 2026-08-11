@@ -26,7 +26,7 @@ from google import genai
 from dotenv import load_dotenv
 import os
 import json
-from database import init_db, save_meal, get_meals_for_date, delete_meal
+from database import init_db, save_meal, get_meals_for_date, delete_meal, save_goals, get_goals
 from datetime import date
 
 load_dotenv() 
@@ -58,7 +58,6 @@ def home():
         (meal_by_type[meal["meal_type"]]).append(meal)
 
     # At this point, I have stored all todays meals in our database, so I also have to display the current macros on the dashboard like total calories, protein, carbs, fats
-
     total_macros={
         "calories":0,
         "protein":0,
@@ -72,7 +71,46 @@ def home():
         total_macros["fat"]+=meal["fat"]
         total_macros["carbs"]+=meal["carbs"]
 
-    return render_template("index.html", meals_by_type=meal_by_type, total_macros=total_macros)
+    # Till this point, we have calculated total macros by category, but now we want to add a macros goal and compare it with user current macros and display it on homepage 
+    # using some fixed numbers (will later add user selection from hoomepage)
+    goals=get_goals(today)
+    if goals is None:
+        goals = {
+            "calories": 2100,
+            "protein": 120,
+            "carbs": 220,
+            "fat": 65
+        }
+
+    flag=0 # stores if macros are hit
+    progress = {
+        "calories": min(
+            round(total_macros["calories"] / goals["calories"] * 100),
+            100
+        ),
+        "protein": min(
+            round(total_macros["protein"] / goals["protein"] * 100),
+            100
+        ),
+        "carbs": min(
+            round(total_macros["carbs"] / goals["carbs"] * 100),
+            100
+        ),
+        "fat": min(
+            round(total_macros["fat"] / goals["fat"] * 100),
+            100
+        )
+    }
+
+    remaining_calories = max(
+        goals["calories"] - total_macros["calories"],
+        0
+    )
+    if(remaining_calories==0):
+        flag=1
+
+
+    return render_template("index.html", meals_by_type=meal_by_type, total_macros=total_macros, progress=progress, remaining_calories=remaining_calories, goals=goals, flag=flag)
 
 # there is also a route called /analyze
 # but it is meant to receive submitted form data
@@ -142,8 +180,18 @@ def delete_logged_meal(meal_id):
     delete_meal(meal_id)
 
     return redirect(url_for("home"))
-    
-    
+
+# This function basically save users today's meal from homepage 
+@app.route("/goals", methods=["POST"])
+def save_meal_date():
+    calories=int(request.form.get("calories"))
+    fat=int(request.form.get("fat"))
+    protein=int(request.form.get("protein"))
+    carbs=int(request.form.get("carbs"))
+    today=date.today().isoformat()
+    save_goals(calories, fat, protein, carbs, today)
+
+    return redirect(url_for("home"))
 
 
 # What it does: It checks if a Python file is being run directly as the main program or if it is being imported as a helper module by another file.How it works: Python automatically changes a hidden variable called __name__. If you run the file directly, Python sets it to "__main__". If you import the file, Python changes it to the file's actual name.Why it is needed: It acts as a safety guard. Without it, any loose code or print statements in a file will accidentally run the exact moment you try to import and reuse that file in a new project.
