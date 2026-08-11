@@ -6,11 +6,44 @@
     <title>MealTrack</title>
 </head>
 <body>
+
+    <!-- <h2>Whats your total goals</h2>
+    <form action="">
+        <label for="protein">Whats your protein target for today?</label>
+        <input type="text",id="protein", placeholder="">
+    </form> --> 
+
+    <h2>Set Today's Goals</h2>
+    <form action="/goals" method="POST">
+        <label for="goal_calories">Calories :</label>
+        <input type="number" id="goal_calories" name="calories" value="{{ goals['calories'] }}" min="1" required>
+
+        <br>
+
+        <label for="goal_protein">Protein :</label>
+        <input type="number" id="goal_protein" name="protein" value="{{ goals['protein'] }}" min="1" required>
+
+        <br>
+
+        <label for="goal_fat">Fats: </label>
+        <input type="number" name="fat" id="goal_fat" value="{{ goals['fat'] }}" min="1" required>
+
+        <br>
+
+        <label for="goal_carbs">Carbs: </label>
+        <input type="number" name="carbs" id="goal_carbs" value="{{ goals['carbs'] }}" min="1" required> 
+
+        <br>
+
+        <button type="submit">Save Goals</button>
+    </form>
+
     <h1>Log a Meal</h1>
 
     <form action="/meals" method="POST">
         <label for="meal_type">Which meal are you logging?</label>
 
+        <!-- for making dropdown entry layout -->
         <select id="meal_type" name="meal_type" required>
             <option value="" selected disabled>Select a meal type</option>
             <option value="Breakfast">Breakfast</option>
@@ -43,6 +76,35 @@
         <li>Carbs: {{ total_macros["carbs"] }} g</li>
         <li>Fat: {{ total_macros["fat"] }} g</li>
     </ul>
+
+    <h2>Daily Progress</h2>
+    <p>
+        Calories:
+        {{total_macros["calories"]}} / {{goals["calories"]}} Kcal
+    </p>
+    <p>{{ remaining_calories }} kcal remaining</p>
+    {% if flag==1 %}
+    <p>Well done, you have completed your daily Calories intake</p>
+    {% else %}
+    {%endif%}
+
+    <p>
+        Protein:
+        {{ total_macros["protein"] }} / {{ goals["protein"] }} g
+        ({{ progress["protein"] }}%)
+    </p>
+
+    <p>
+        Carbs:
+        {{ total_macros["carbs"] }} / {{ goals["carbs"] }} g
+        ({{ progress["carbs"] }}%)
+    </p>
+
+    <p>
+        Fat:
+        {{ total_macros["fat"] }} / {{ goals["fat"] }} g
+        ({{ progress["fat"] }}%)
+    </p>
 
     <h2>Today's Meals</h2>
 
