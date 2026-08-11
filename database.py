@@ -33,6 +33,19 @@ def init_db():
     )
         """
     )
+
+    # Table to store daily user goals
+    curr.execute(
+        """
+        CREATE TABLE IF NOT EXISTS daily_goals(
+        protein INTEGER NOT NULL,
+        carbs INTEGER NOT NULL,
+        fat INTEGER NOT NULL,
+        calories INTEGER NOT NULL,
+        goal_date DATE PRIMARY KEY
+        )
+        """
+    )
     # sqlite commit the changes
     connection.commit()
 
@@ -74,6 +87,20 @@ def save_meal(meal_description, meal_type, data, meal_date):
     connection.commit() # to commit the actual changes 
     connection.close() # to close the connection bw sqlite and python
 
+def save_goals(calories, fat, protein, carbs, today):
+    connection=sqlite3.connect("meals.db") # make sure database is one 
+    curr=connection.cursor()
+    curr.execute(
+        """
+        INSERT OR REPLACE INTO daily_goals
+        (calories, fat, protein, carbs, goal_date) 
+        VALUES (?,?,?,?,?)
+        """,
+        (calories, fat, protein, carbs, today)
+    )
+    connection.commit()
+    connection.close()
+
 def get_meals_for_date(meal_date):
     connection=sqlite3.connect('meals.db')
     connection.row_factory = sqlite3.Row
@@ -99,6 +126,24 @@ def get_meals_for_date(meal_date):
     connection.close()
 
     return meals
+
+def get_goals(meal_date):
+    con=sqlite3.connect('meals.db')
+    con.row_factory = sqlite3.Row
+    cur=con.cursor()
+    cur.execute(
+        """
+        SELECT calories, protein, carbs, fat
+        FROM daily_goals
+        WHERE goal_date = ?
+        """,
+        (meal_date,)
+    )
+    goals=cur.fetchone()
+    con.close()
+
+    return goals
+
 
 def delete_meal(meal_id):
     connection=sqlite3.connect("meals.db")
