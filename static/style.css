@@ -1,0 +1,693 @@
+:root {
+    --bg: #f6f7f5;
+    --surface: #ffffff;
+    --surface-soft: #eef1eb;
+    --border: #e1e6de;
+    --text: #202420;
+    --muted: #697269;
+    --brand: #526b52;
+    --brand-dark: #405640;
+    --danger: #9a3f3f;
+    --danger-bg: #fff4f4;
+    --shadow: 0 14px 34px rgba(30, 40, 30, 0.08);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 220ms;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f6f7f5;
+    color: black;
+}
+
+body.htmx-swapping {
+    opacity: 0.6;
+    transition: opacity 100ms ease-out;
+}
+
+.app-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+}
+
+.sidebar {
+    background: radial-gradient(140% 90% at 0% 0%, #2c3823 0%, #212b1c 55%);
+    padding: 36px 24px;
+    border-right: 1px solid #17200f;
+}
+
+.brand h1 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: #f4f1e6;
+}
+
+.brand p {
+    margin: 6px 0 32px;
+    color: #9db290;
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.sidebar-nav {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    padding-left: 6px; /* room for the vine */
+}
+
+/* the vine running behind the nav items */
+.sidebar-nav::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 22px;
+    bottom: 22px;
+    width: 1px;
+    background: linear-gradient(180deg, #7c9a6e 0%, rgba(124,154,110,0.12) 100%);
+}
+
+.sidebar-nav a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #c7cdb8;
+    text-decoration: none;
+    padding: 11px 14px 11px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 14.5px;
+    transition: background .18s ease, color .18s ease;
+}
+
+/* leaf node marker on each link */
+.sidebar-nav a::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #212b1c;
+    border: 1.5px solid #7c9a6e;
+    flex-shrink: 0;
+    transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+/* The hover effect state */
+.sidebar-nav a:hover {
+    color: #f4f1e6;
+    background-color: rgba(244, 241, 230, 0.06);
+}
+
+.sidebar-nav a:focus-visible {
+    outline: 2px solid #e0a24e;
+    outline-offset: 2px;
+}
+
+.sidebar-nav a:first-child {
+    background: rgba(124, 154, 110, 0.16);
+    color: #f4f1e6;
+    font-weight: 600;
+}
+
+.sidebar-nav a:first-child::before {
+    background: #e0a24e;
+    border-color: #e0a24e;
+    box-shadow: 0 0 0 4px rgba(224, 162, 78, 0.18);
+}
+
+.dashboard {
+    padding: 40px;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    color: #3a4a30;
+}
+
+.dashboard-header p {
+    margin: 8px 0 28px;
+    color: #666;
+}
+/* at this point, we are styling the summary section into clean dashboard */
+.energy-hero {
+    background: white;
+    border: 1px solid #e4e7e2;
+    border-radius: 16px;
+    padding: 28px 32px 32px;
+    box-shadow: 0 10px 24px rgba(30, 40, 30, 0.06);
+    margin-bottom: 28px;
+}
+
+.hero-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.hero-head h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3a4a30;
+}
+
+.goal-line {
+    margin: 0;
+    font-size: 14px;
+    color: #8a9188;
+}
+
+.goal-line strong {
+    color: #2a2f24;
+}
+
+/* ---------- ring engine (shared by hero + macro rings) ---------- */
+.ring-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.ring-track,
+.ring-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+}
+
+.ring-track {
+    background: #eceee7;
+}
+
+.ring-fill {
+    background: conic-gradient(
+        from -90deg,
+        var(--ring-color-a) 0%,
+        var(--ring-color-b) calc(var(--pct) * 1%),
+        transparent calc(var(--pct) * 1% + 0.1%)
+    );
+}
+
+.ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* large hero ring */
+.ring-lg { width: 200px; height: 200px; }
+.ring-lg .ring-track,
+.ring-lg .ring-fill {
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 16px), #000 calc(100% - 16px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 16px), #000 calc(100% - 16px));
+}
+.ring-number {
+    font-size: 34px;
+    font-weight: 700;
+    color: #1f251f;
+    line-height: 1.1;
+}
+.ring-label {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #737b73;
+}
+
+/* small macro rings */
+.ring-sm { width: 72px; height: 72px; margin: 0 auto; }
+.ring-sm .ring-track,
+.ring-sm .ring-fill {
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+}
+.ring-pct {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2a2f24;
+}
+
+@property --pct {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+.ring-wrap {
+    transition: --pct 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* ---------- hero body layout ---------- */
+.hero-body {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 28px;
+    align-items: center;
+}
+
+.eaten-card {
+    background: #f4f6f2;
+    border-radius: 14px;
+    padding: 24px 26px;
+}
+
+.eaten-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.eaten-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(124, 154, 110, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.eaten-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5a675a;
+}
+
+.eaten-number {
+    margin: 0 0 14px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #1f251f;
+}
+.eaten-number .unit {
+    font-size: 15px;
+    font-weight: 500;
+    color: #8a9188;
+}
+
+.progress-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: #e4e7e2;
+    overflow: hidden;
+}
+.progress-bar div {
+    height: 100%;
+    border-radius: 999px;
+    background: #4f684f;
+}
+
+.eaten-sub {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: #8a9188;
+}
+
+/* ---------- macro row ---------- */
+.macro-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 28px;
+}
+
+.macro-card {
+    border: 1px solid #e4e7e2;
+    border-radius: 14px;
+    padding: 22px 16px;
+    text-align: center;
+}
+
+.macro-grams {
+    margin: 14px 0 2px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1f251f;
+}
+
+.macro-label {
+    margin: 0;
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #8a9188;
+}
+
+@media (max-width: 720px) {
+    .hero-body { grid-template-columns: 1fr; justify-items: center; }
+    .macro-row { grid-template-columns: 1fr; }
+}
+
+/* We are styling the forms to make it interactive */
+.forms-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 22px;
+    margin-bottom: 32px;
+}
+
+.panel {
+    background-color: white;
+    border: 1px solid #e4e7e2;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 10px 24px rgba(30, 40, 30, 0.06);
+}
+
+.panel h3 {
+    margin: 0 0 18px;
+    color: #4b624b;
+    font-size: 22px;
+}
+
+.panel form {
+    display: grid;
+    gap: 10px;
+}
+
+.panel label {
+    color: #515b51;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.panel input,
+.panel select {
+    appearance: none;
+    background-color: #fbfcfb;
+    border: 1px solid #d6ddd2;
+    border-radius: 8px;
+    padding: 12px 42px 12px 14px;
+    font-size: 15px;
+    color: #202420;
+    cursor: pointer;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #526b52 50%),
+        linear-gradient(135deg, #526b52 50%, transparent 50%);
+    background-position:
+        calc(100% - 20px) 50%,
+        calc(100% - 14px) 50%;
+    background-size:
+        6px 6px,
+        6px 6px;
+    background-repeat: no-repeat;
+}
+
+.panel input:focus,
+.panel select:focus {
+    outline: none;
+    border-color: #526b52;
+    box-shadow: 0 0 0 3px rgba(82, 107, 82, 0.14);
+}
+
+.panel button {
+    margin-top: 8px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #526b52;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.panel button:hover {
+    background-color: #435943;
+}
+
+/* Styling the Todays Meals section  */
+.meals-section {
+    margin-top: 8px;
+}
+
+.meals-section > h3 {
+    margin: 0 0 18px;
+    color: #4b624b;
+    font-size: 26px;
+}
+
+.meal-sections {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.meal-group {
+    background-color: white;
+    border: 1px solid #e4e7e2;
+    border-radius: 8px;
+    padding: 22px;
+    box-shadow: 0 10px 24px rgba(30, 40, 30, 0.06);
+}
+
+.meal-group h4 {
+    margin: 0 0 14px;
+    color: #526b52;
+    font-size: 18px;
+}
+
+.meal-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.meal-group li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid #edf0eb;
+}
+
+.meal-group li:first-child {
+    border-top: none;
+}
+
+.meal-group strong {
+    display: block;
+    color: #202420;
+    font-size: 15px;
+}
+
+.meal-group span {
+    color: #667066;
+    font-size: 14px;
+}
+
+.meal-group li > div:last-child {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+.meal-group button {
+    border: 1px solid #e1c7c7;
+    background-color: #fff7f7;
+    color: #9a3f3f;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.meal-group button:hover {
+    background-color: #ffecec;
+}
+
+.meal-group p {
+    margin: 0;
+    color: #7a837a;
+}
+
+@media (max-width: 900px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #dfe4dc;
+    }
+
+    .sidebar-nav {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dashboard {
+        padding: 24px;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .forms-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .meal-sections {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* if screen proportion is smaller */
+@media (max-width: 560px) {
+    .sidebar {
+        padding: 22px;
+    }
+
+    .sidebar-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard {
+        padding: 18px;
+    }
+
+    .dashboard-header h2 {
+        font-size: 28px;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .meal-group li {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .meal-group li > div:last-child {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: #e8ece5;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 14px;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #526b52;
+    border-radius: inherit;
+}
+
+#progress-ca{
+    height: 100%;
+    background-color: #de8c59;
+    border-radius: inherit;
+}
+#progress-c{
+    height: 100%;
+    background-color: #dd7be0;
+    border-radius: inherit;
+}
+#progress-p{
+    height: 100%;
+    background-color: #58c7d3;
+    border-radius: inherit;
+}
+#progress-f{
+    height: 100%;
+    background-color: #ebdb45;
+    border-radius: inherit;
+}
+/* in case no meal is logged in yet, there has to be interactive way to showcase thats */
+.empty-state {
+    padding: 18px;
+    border: 1px dashed #cfd8cb;
+    border-radius: 8px;
+    background-color: #fbfcfb;
+    color: #7a837a;
+    text-align: center;
+}
+
+.delete-button {
+    border: 1px solid #e1c7c7;
+    background-color: #fff7f7;
+    color: #9a3f3f;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #cc6363;
+}
+
+.dashboard-header {
+    margin-bottom: 28px;
+}
+
+.eyebrow {
+    margin: 0 0 6px;
+    color: #7b867b;
+    font-size:15px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    font-size: 38px;
+    color: #4b624b;
+}
+
+.dashboard-header p {
+    margin: 8px 0 0;
+    color: #666;
+}
+
+/* for styling the success message if calories goal is completed */
+.success-message {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid #c8ddc4;
+    border-radius: 8px;
+    background-color: #f2faf0;
+    color: #3f6b3f;
+    font-weight: 600;
+}
