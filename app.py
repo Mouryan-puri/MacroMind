@@ -139,7 +139,7 @@ def log_meal():
     Use exactly this structure:
 
     {{
-        "meal_name": "short, clear meal name",
+        "meal_name": "Give few words description to this meal like explaining what that is",
         "calories": 0,
         "protein": 0,
         "carbs": 0,
