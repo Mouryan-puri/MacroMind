@@ -26,7 +26,7 @@ from google import genai
 from dotenv import load_dotenv
 import os
 import json
-from database import init_db, save_meal, get_meals_for_date, delete_meal, save_goals, get_goals
+from database.database import init_db, save_meal, get_meals_for_date, delete_meal, save_goals, get_goals
 from datetime import date
 
 load_dotenv() 
@@ -155,7 +155,7 @@ def log_meal():
     # function that sends your prompt to AI model and gets answer back
     # basically, this take this input text, send it to gemini, let gemini think, and gets the response back
     response = client.models.generate_content(
-        model="gemini-3.5-flash",
+        model="gemini-3.7-flash",
         contents=prompt,
     )
 
