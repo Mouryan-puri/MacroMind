@@ -23,6 +23,17 @@ AI Meal Tracker is a full-stack Flask web application that helps users log meals
 - Gemini API
 - python-dotenv
 
+## Screenshots
+![](screenshots/Screenshot%202026-08-14%20at%204.19.32 PM.png)
+
+![](screenshots/Screenshot%202026-08-14%20at%204.20.21 PM.png)
+
+![](screenshots/Screenshot%202026-08-14%20at%204.20.34 PM.png)
+
+## Demo
+
+To be uploaded once deployement is done
+
 ## Project Overview
 
 The app follows a server-rendered Flask architecture. Users submit meals through an HTML form, Flask sends the meal description to the Gemini API, parses the returned JSON nutrition estimate, stores the result in SQLite, and renders the updated dashboard using Jinja templates.
@@ -126,7 +137,7 @@ Do not commit your `.env` file to GitHub.
 - Styling a responsive dashboard with HTML and CSS
 - Debugging API responses, database writes, and template rendering
 
-## Future Improvements
+## Things I will be working on soon 
 
 - Add user authentication
 - Add meal editing
