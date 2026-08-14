@@ -3,193 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MealTrack</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <title>MacroMind — Nutrition Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.3"></script>
-    <script>
-        htmx.config.globalViewTransitions = true;
-    </script>
+    <script>htmx.config.globalViewTransitions = true;</script>
 </head>
 <body hx-boost="true" hx-swap="innerHTML transition:true">
-    <div class="app-layout">
 
-        <aside class="sidebar">
-            <div class="brand">
+<div class="grain" aria-hidden="true"></div>
+<div class="aurora" aria-hidden="true"><span></span><span></span></div>
+
+<div class="app">
+
+    <!-- ══════════ SIDEBAR ══════════ -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                    <path d="M12 21c0-6 3-10 8-11-1 7-4 10-8 11Z"/>
+                    <path d="M12 21C9 16 5 15 3 15c1 4 4 6 9 6Z"/>
+                    <path d="M12 21v-4"/>
+                </svg>
+            </div>
+            <div>
                 <h1>MacroMind</h1>
-                <p>Simple nutrition tracking</p>
+                <p>Nutrition, quietly tracked</p>
+            </div>
+        </div>
+
+        <nav class="nav" aria-label="Main">
+            <a href="{{ url_for('home') }}" class="is-active">
+                <span class="nav-dot"></span> Dashboard
+            </a>
+            <a href="#log">
+                <span class="nav-dot"></span> Log a Meal
+            </a>
+            <a href="#goals">
+                <span class="nav-dot"></span> Goals
+            </a>
+            <a href="#meals">
+                <span class="nav-dot"></span> Today's Meals
+            </a>
+        </nav>
+
+        <div class="sidebar-foot">
+            <div class="streak-chip">
+                <span class="pulse"></span>
+                <div>
+                    <strong>{{ progress['calories'] }}%</strong>
+                    <span>of today's energy goal</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══════════ MAIN ══════════ -->
+    <main class="main">
+
+        <header class="page-head">
+            <div>
+                <p class="eyebrow">Dashboard<span class="dot"></span><span id="today-label"></span></p>
+                <h2 class="display">
+                    <span id="greeting">Good Morning</span><span class="accent">.</span>
+                </h2>
+                <p class="lede">Here's how your day is shaping up.</p>
             </div>
 
-            <nav class="sidebar-nav">
-                <a href="{{url_for('home')}}">Home</a>
-                <a href="#b">Meal Log</a>
-                <a href="#">Goals</a>
-            </nav>
-        </aside>
+            <div class="head-stat">
+                <span class="head-stat-label">Remaining</span>
+                <span class="head-stat-value" data-count="{{ remaining_calories }}">{{ remaining_calories }}</span>
+                <span class="head-stat-unit">kcal</span>
+            </div>
+        </header>
 
-        <main class="dashboard">
+        <!-- ══════════ ENERGY HERO ══════════ -->
+        <section class="hero">
+            <div class="hero-glow" aria-hidden="true"></div>
 
-            <header class="dashboard-header">
-                <div>
-                    <p class="eyebrow">Dashboard</p>
-                    <h2>Good Morning</h2>
-                    <p>Here is your nutritional overview for today.</p>
-                </div>
-            </header>
-
-            <section class="energy-hero">
             <div class="hero-head">
-                <h3>Daily Energy Balance</h3>
-                <p class="goal-line">Daily Goal: <strong>{{ goals["calories"] }} kcal</strong></p>
+                <h3 class="section-title">Daily Energy Balance</h3>
+                <p class="goal-line">Goal <strong>{{ goals['calories'] }}</strong> kcal</p>
             </div>
 
             <div class="hero-body">
-                <div class="ring-wrap ring-lg" style="--pct:{{ 100 - progress['calories'] }}; --ring-color-a:#2f5233; --ring-color-b:#8fd19e;">
+
+                <div class="ring ring-lg" style="--pct: 0; --to: {{ progress['calories'] if progress['calories'] < 100 else 100 }};">
                     <div class="ring-track"></div>
                     <div class="ring-fill"></div>
                     <div class="ring-center">
-                        <span class="ring-number">{{ remaining_calories }}</span>
-                        <span class="ring-label">kcal remaining</span>
+                        <span class="ring-number" data-count="{{ remaining_calories }}">{{ remaining_calories }}</span>
+                        <span class="ring-label">kcal left</span>
                     </div>
                 </div>
 
-                <div class="eaten-card">
-                    <div class="eaten-top">
-                        <span class="eaten-icon">🍴</span>
-                        <span class="eaten-title">Total Eaten</span>
+                <div class="hero-side">
+                    <div class="eaten">
+                        <p class="micro">Total eaten</p>
+                        <p class="eaten-number">
+                            <span data-count="{{ total_macros['calories'] }}">{{ total_macros['calories'] }}</span>
+                            <span class="unit">kcal</span>
+                        </p>
+                        <div class="bar"><div class="bar-fill" style="--w: {{ progress['calories'] if progress['calories'] < 100 else 100 }}%"></div></div>
+                        <p class="micro muted">{{ progress['calories'] }}% of {{ goals['calories'] }} kcal</p>
                     </div>
-                    <p class="eaten-number">{{ total_macros["calories"] }} <span class="unit">kcal</span></p>
-                    <div class="progress-bar">
-                        <div style="width: {{ progress['calories'] }}%;"></div>
-                    </div>
-                    <p class="eaten-sub">{{ progress['calories'] }}% of daily goal</p>
-                </div>
-            </div>
 
-            <div class="macro-row">
-                <div class="macro-card" style="--ring-color-a:#4f7a4f; --ring-color-b:#4f7a4f; --pct:{{ progress['protein'] }}">
-                    <div class="ring-wrap ring-sm">
-                        <div class="ring-track"></div>
-                        <div class="ring-fill"></div>
-                        <div class="ring-center"><span class="ring-pct">{{ progress['protein'] }}%</span></div>
-                    </div>
-                    <p class="macro-grams">{{ total_macros["protein"] }}g</p>
-                    <p class="macro-label">Protein</p>
-                </div>
+                    {% if progress['calories'] >= 100 %}
+                        <p class="success-message">Goal reached — nice work today.</p>
+                    {% endif %}
 
-                <div class="macro-card" style="--ring-color-a:#d98b3f; --ring-color-b:#d98b3f; --pct:{{ progress['carbs'] }}">
-                    <div class="ring-wrap ring-sm">
-                        <div class="ring-track"></div>
-                        <div class="ring-fill"></div>
-                        <div class="ring-center"><span class="ring-pct">{{ progress['carbs'] }}%</span></div>
-                    </div>
-                    <p class="macro-grams">{{ total_macros["carbs"] }}g</p>
-                    <p class="macro-label">Carbs</p>
-                </div>
+                    <div class="macro-row">
+                        <div class="macro" style="--c: var(--protein); --to: {{ progress['protein'] if progress['protein'] < 100 else 100 }};">
+                            <div class="ring ring-sm" style="--pct: 0; --to: {{ progress['protein'] if progress['protein'] < 100 else 100 }};">
+                                <div class="ring-track"></div>
+                                <div class="ring-fill"></div>
+                                <div class="ring-center"><span class="ring-pct">{{ progress['protein'] }}<i>%</i></span></div>
+                            </div>
+                            <p class="macro-grams">{{ total_macros['protein'] }}<i>g</i></p>
+                            <p class="macro-label">Protein</p>
+                        </div>
 
-                <div class="macro-card" style="--ring-color-a:#6f9bab; --ring-color-b:#6f9bab; --pct:{{ progress['fat'] }}">
-                    <div class="ring-wrap ring-sm">
-                        <div class="ring-track"></div>
-                        <div class="ring-fill"></div>
-                        <div class="ring-center"><span class="ring-pct">{{ progress['fat'] }}%</span></div>
+                        <div class="macro" style="--c: var(--carbs);">
+                            <div class="ring ring-sm" style="--pct: 0; --to: {{ progress['carbs'] if progress['carbs'] < 100 else 100 }};">
+                                <div class="ring-track"></div>
+                                <div class="ring-fill"></div>
+                                <div class="ring-center"><span class="ring-pct">{{ progress['carbs'] }}<i>%</i></span></div>
+                            </div>
+                            <p class="macro-grams">{{ total_macros['carbs'] }}<i>g</i></p>
+                            <p class="macro-label">Carbs</p>
+                        </div>
+
+                        <div class="macro" style="--c: var(--fat);">
+                            <div class="ring ring-sm" style="--pct: 0; --to: {{ progress['fat'] if progress['fat'] < 100 else 100 }};">
+                                <div class="ring-track"></div>
+                                <div class="ring-fill"></div>
+                                <div class="ring-center"><span class="ring-pct">{{ progress['fat'] }}<i>%</i></span></div>
+                            </div>
+                            <p class="macro-grams">{{ total_macros['fat'] }}<i>g</i></p>
+                            <p class="macro-label">Fats</p>
+                        </div>
                     </div>
-                    <p class="macro-grams">{{ total_macros["fat"] }}g</p>
-                    <p class="macro-label">Fats</p>
                 </div>
             </div>
         </section>
 
-            <section class="forms-grid", id="b">
-                <article class="panel">
-                    <h3>Log a Meal</h3>
+        <!-- ══════════ FORMS ══════════ -->
+        <section class="forms">
 
-                    <form action="/meals" method="POST">
-                        <label for="meal_type">Meal type</label>
-                        <select id="meal_type" name="meal_type" required>
-                            <option value="" selected disabled>Select a meal type</option>
-                            <option value="Breakfast">Breakfast</option>
-                            <option value="Lunch">Lunch</option>
-                            <option value="Snack">Snack</option>
-                            <option value="Dinner">Dinner</option>
-                        </select>
-
-                        <label for="meal">What did you eat?</label>
-                        <input
-                            id="meal"
-                            name="meal"
-                            type="text"
-                            placeholder="Example: eggs, toast, and coffee"
-                            required
-                        >
-
-                        <button type="submit">Add Meal</button>
-                    </form>
-                </article>
-
-                <article class="panel">
-                    <h3>Daily Goals</h3>
-
-                    <form action="/goals" method="POST">
-                        <label for="goal_calories">Calories</label>
-                        <input type="number" id="goal_calories" name="calories" value="{{ goals['calories'] }}" min="1" required>
-
-                        <label for="goal_protein">Protein</label>
-                        <input type="number" id="goal_protein" name="protein" value="{{ goals['protein'] }}" min="1" required>
-
-                        <label for="goal_carbs">Carbs</label>
-                        <input type="number" id="goal_carbs" name="carbs" value="{{ goals['carbs'] }}" min="1" required>
-
-                        <label for="goal_fat">Fat</label>
-                        <input type="number" id="goal_fat" name="fat" value="{{ goals['fat'] }}" min="1" required>
-
-                        <button type="submit">Save Goals</button>
-                    </form>
-                </article>
-            </section>
-
-            <section class="meals-section">
-                <h3>Today's Meals</h3>
-
-                <div class="meal-sections">
-                    {% for meal_type, section_meals in meals_by_type.items() %}
-                        <article class="meal-group">
-                            <h4>{{ meal_type }}</h4>
-
-                            {% if section_meals %}
-                                <ul>
-                                    {% for meal in section_meals %}
-                                        <li>
-                                            <div>
-                                                <strong>{{ meal["meal_name"] }}</strong>
-                                                <!-- <span>{{ meal["meal_name"] }}</span> -->
-                                                <span>P: {{meal["protein"]}} g</span>
-                                                <span>F: {{meal["fat"]}} g</span>
-                                                <span>C: {{meal["carbs"]}} g</span>
-                                            </div>
-
-                                            <div>
-                                                <span>{{ meal["calories"] }} kcal</span>
-
-                                                <form
-                                                    action="{{ url_for('delete_logged_meal', meal_id=meal['id']) }}"
-                                                    method="POST"
-                                                >
-                                                    <button type="submit" class="delete-button">Remove</button>
-                                                </form>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <p class="empty-state">No {{ meal_type.lower() }} logged yet.</p>
-                            {% endif %}
-                        </article>
-                    {% endfor %}
+            <article class="panel panel-accent" id="log">
+                <div class="panel-head">
+                    <h3 class="section-title">Log a Meal</h3>
+                    <span class="tag">Quick add</span>
                 </div>
-            </section>
 
-        </main>
-    </div>
+                <form action="/meals" method="POST" class="form">
+                    <div class="field">
+                        <label for="meal_type">Meal type</label>
+                        <div class="chip-row" role="radiogroup" aria-label="Meal type">
+                            {% for t in ['Breakfast', 'Lunch', 'Snack', 'Dinner'] %}
+                                <label class="chip">
+                                    <input type="radio" name="meal_type" value="{{ t }}" required>
+                                    <span>{{ t }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="meal">What did you eat?</label>
+                        <input id="meal" name="meal" type="text"
+                               placeholder="Two eggs, sourdough toast, black coffee" required>
+                        <p class="hint">Describe it naturally — macros get estimated for you.</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Add meal
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </button>
+                </form>
+            </article>
+
+            <article class="panel" id="goals">
+                <div class="panel-head">
+                    <h3 class="section-title">Daily Goals</h3>
+                    <span class="tag tag-ghost">Targets</span>
+                </div>
+
+                <form action="/goals" method="POST" class="form">
+                    <div class="goal-grid">
+                        <div class="field">
+                            <label for="goal_calories">Calories</label>
+                            <div class="input-unit">
+                                <input type="number" id="goal_calories" name="calories" value="{{ goals['calories'] }}" min="1" required>
+                                <span>kcal</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="goal_protein">Protein</label>
+                            <div class="input-unit">
+                                <input type="number" id="goal_protein" name="protein" value="{{ goals['protein'] }}" min="1" required>
+                                <span>g</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="goal_carbs">Carbs</label>
+                            <div class="input-unit">
+                                <input type="number" id="goal_carbs" name="carbs" value="{{ goals['carbs'] }}" min="1" required>
+                                <span>g</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="goal_fat">Fat</label>
+                            <div class="input-unit">
+                                <input type="number" id="goal_fat" name="fat" value="{{ goals['fat'] }}" min="1" required>
+                                <span>g</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-ghost">Save goals</button>
+                </form>
+            </article>
+        </section>
+
+        <!-- ══════════ MEALS ══════════ -->
+        <section class="meals" id="meals">
+            <div class="panel-head panel-head-bare">
+                <h3 class="section-title">Today's Meals</h3>
+            </div>
+
+            <div class="meal-grid">
+                {% for meal_type, section_meals in meals_by_type.items() %}
+                    <article class="meal-group">
+                        <header class="meal-group-head">
+                            <h4>{{ meal_type }}</h4>
+                            <span class="count">{{ section_meals|length }}</span>
+                        </header>
+
+                        {% if section_meals %}
+                            <ul class="meal-list">
+                                {% for meal in section_meals %}
+                                    <li class="meal-item">
+                                        <div class="meal-main">
+                                            <strong>{{ meal['meal_name'] }}</strong>
+                                            <div class="macro-pills">
+                                                <span class="pill pill-p">P {{ meal['protein'] }}g</span>
+                                                <span class="pill pill-c">C {{ meal['carbs'] }}g</span>
+                                                <span class="pill pill-f">F {{ meal['fat'] }}g</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-side">
+                                            <span class="kcal">{{ meal['calories'] }}<i>kcal</i></span>
+                                            <form action="{{ url_for('delete_logged_meal', meal_id=meal['id']) }}" method="POST">
+                                                <button type="submit" class="delete-button" aria-label="Remove {{ meal['meal_name'] }}">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="empty-state">Nothing logged for {{ meal_type.lower() }} yet.</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+(function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function greet() {
+        var h = new Date().getHours();
+        var g = h < 12 ? 'Good Morning' : h < 18 ? 'Good Afternoon' : 'Good Evening';
+        var el = document.getElementById('greeting');
+        if (el) el.textContent = g;
+        var d = document.getElementById('today-label');
+        if (d) d.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+    }
+
+    function countUp(el) {
+        var target = parseFloat(el.dataset.count || el.textContent) || 0;
+        if (reduce || target === 0) { el.textContent = Math.round(target); return; }
+        var start = performance.now(), dur = 900;
+        function step(now) {
+            var t = Math.min((now - start) / dur, 1);
+            var e = 1 - Math.pow(1 - t, 3);
+            el.textContent = Math.round(target * e);
+            if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    function fillRings() {
+        document.querySelectorAll('.ring').forEach(function (r) {
+            var to = r.style.getPropertyValue('--to') || 0;
+            if (reduce) { r.style.setProperty('--pct', to); return; }
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () { r.style.setProperty('--pct', to); });
+            });
+        });
+    }
+
+    function activeNav() {
+        var links = document.querySelectorAll('.nav a[href^="#"]');
+        var targets = [];
+        links.forEach(function (l) {
+            var t = document.querySelector(l.getAttribute('href'));
+            if (t) targets.push({ link: l, el: t });
+        });
+        if (!targets.length || !('IntersectionObserver' in window)) return;
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (!en.isIntersecting) return;
+                document.querySelectorAll('.nav a').forEach(function (a) { a.classList.remove('is-active'); });
+                var hit = targets.find(function (t) { return t.el === en.target; });
+                if (hit) hit.link.classList.add('is-active');
+            });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        targets.forEach(function (t) { io.observe(t.el); });
+    }
+
+    function chips() {
+        document.querySelectorAll('.chip input').forEach(function (i) {
+            i.addEventListener('change', function () {
+                document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('is-on'); });
+                i.closest('.chip').classList.add('is-on');
+            });
+        });
+    }
+
+    function init() {
+        greet();
+        document.querySelectorAll('[data-count]').forEach(countUp);
+        fillRings();
+        activeNav();
+        chips();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.body.addEventListener('htmx:afterSwap', init);
+})();
+</script>
+
 </body>
 </html>
